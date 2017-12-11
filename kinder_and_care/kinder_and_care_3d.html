@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+    font-family: NanumSquareRoundOTF;
+  }
+  
+  canvas {
+    cursor: crosshair;
+  }
+  
+  #stage {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    transform-origin: left top;
+    width: 1920px;
+    height: 1080px;
+    /* background-color: aquamarine; */
+    /* background-image: radial-gradient(circle, yellow, #f06d06); */
+  }
+  
+  #view {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 800px;
+    height: 1080px;
+  }
+  
+  #story {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 1120px;
+    font-size: 40px;
+    line-height: 1.5em;
+    color: white;
+    padding: 50px;
+    box-sizing: border-box;
+  }
+  
+  .tag {
+    background-color: #2f2f2f;
+    cursor: pointer;
+  }
+  
+  .tag.kinder {
+    border-bottom: 2px solid aquamarine;
+  }
+  
+  .tag.care {
+    border-bottom: 2px solid yellow;
+  }
+  
+  .tag.close {
+    border-bottom: 2px solid red;
+  }
+  
+  .tag.total {
+    border-bottom: 2px solid white;
+  }
+  
+  #kinder-name {
+    position: absolute;
+    top: 50px;
+    left: 0px;
+    font-size: 45px;
+    color: white;
+  }
+  
+  #kinder-stat {
+    position: absolute;
+    top: 140px;
+    left: 0px;
+    font-size: 20px;
+    color: silver;
+    white-space: pre;
+    line-height: 1.25em;
+  }
+  
+  .label {
+    position: absolute;
+    background-color: magenta;
+    left: 0px;
+    top: 0px;
+    width: 10px;
+    height: 10px;
+  }
+</style>
+<body>
+  <div id="stage">
+    <div id="view">
+    </div>
+    <div id="story">
+      <div id="kinder-name"></div>
+      <div id="kinder-stat"></div>
+    </div>
+  </div>
+</body>
+<script src="./lib/three.js"></script>
+<script src="./lib/opentype.js"></script>
+<!--<script src="./lib/tessellatemodifier.js"></script>-->
+<script src="./js/custom_shader.js"></script>
+<script src="./js/svg_to_mesh.js"></script>
+<script src="./js/data_load.js"></script>
+<script src="./js/hangul2350.js"></script>
+<script>
+  let el_stage = document.querySelector('#stage');
+  let el_view = document.querySelector('#view');
+  let el_story = document.querySelector('#story');
+  let img_terrain, img_satmap;
+  let img_terrain_data = null;
+  let mat_terrain, mesh_terrain;
+  
+  let mean_x = 0;
+  let mean_y = 0;
+  let min_x = Number.MAX_VALUE;
+  let min_y = Number.MAX_VALUE;
+  let max_x = Number.MIN_VALUE;
+  let max_y = Number.MIN_VALUE;
+  let map_width = 1;
+  let map_height = 1;
+  
+  let v_min_x = Number.MAX_VALUE;
+  let v_min_y = Number.MAX_VALUE;
+  let v_max_x = Number.MIN_VALUE;
+  let v_max_y = Number.MIN_VALUE;
+  let v_width = 1;
+  let v_height = 1;
+  
+  let renderer;
+  let scene, camera;
+  
+  scene = new THREE.Scene();
+  //scene.background = new THREE.Color( 0xb00000 );
+  let world = new THREE.Group();
+  let land = new THREE.Group();
+  let place = new THREE.Group();
+  world.add(land);
+  world.add(place);
+  scene.add(world);
+  world.position.x = -25;
+  
+  var mouse = new THREE.Vector2(), INTERSECTED;
+  
+  renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  //renderer.setSize( 800, 1080 );
+  renderer.setSize( 1920, 1080 );
+  el_view.appendChild( renderer.domElement );
+  
+  /// Global : camera
+  camera = new THREE.PerspectiveCamera( 30, 1920 / 1080, 1, 1000 );
+  /*
+  let width = 800;
+  let height = 1080;
+  camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+  */
+  camera.position.set( 0, 0, 100 );
+  
+  /*
+  let tf_world = {
+    object: world,
+    rotation: [0, 0, 0],
+    to_rotation: [0, 0, 0],
+    position: [0, 0, 0],
+    to_position: [0, 0, 0],
+    update: function() {
+      this.rotation[0] += (this.to_rotation[0] - this.rotation[0]) * 0.1;
+      this.rotation[1] += (this.to_rotation[1] - this.rotation[1]) * 0.1;
+      this.rotation[2] += (this.to_rotation[2] - this.rotation[2]) * 0.1;
+      this.position[0] += (this.to_position[0] - this.position[0]) * 0.1;
+      this.position[1] += (this.to_position[1] - this.position[1]) * 0.1;
+      this.position[2] += (this.to_position[2] - this.position[2]) * 0.1;
+      this.object.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
+      this.object.position.set(this.position[0],this.position[1],this.position[2]);
+    },
+  }
+  */
+  let tf_world = {
+    object: world,
+    rotation: new THREE.Vector3(),
+    to_rotation: new THREE.Vector3(),
+    position: new THREE.Vector3(),
+    to_position: new THREE.Vector3(),
+    dt: 0.05,
+    update: function() {
+      this.rotation.x += (this.to_rotation.x - this.rotation.x) * this.dt;
+      this.rotation.y += (this.to_rotation.y - this.rotation.y) * this.dt;
+      this.rotation.z += (this.to_rotation.z - this.rotation.z) * this.dt;
+      this.position.x += (this.to_position.x - this.position.x) * this.dt;
+      this.position.y += (this.to_position.y - this.position.y) * this.dt;
+      this.position.z += (this.to_position.z - this.position.z) * this.dt;
+      this.object.rotation.set(this.rotation.x,this.rotation.y,this.rotation.z);
+      this.object.position.set(this.position.x,this.position.y,this.position.z);
+    },
+  }
+  
+  let ambient = new THREE.AmbientLight(0x111111);
+  scene.add(ambient);
+
+  //light = new THREE.SpotLight(0xffffff);
+  let light = new THREE.DirectionalLight(0xffffff);
+  light.position.set(10, 30, 100);
+  light.target.position.set(0, 0, 0);
+  scene.add(light);
+  
+  let raycaster = new THREE.Raycaster();
+    
+  function layout() {
+    let s = window.innerWidth / 1920;
+    el_stage.style.transform = `scale(${s},${s})`; 
+  }
+  window.onresize = layout;
+  layout();
+  
+  /*
+  let region_bg_colors = Array(5).fill().map((x,i) => {
+    let gray = 40 + i * 8;
+    return `rgb(${gray},${gray},${gray+10})`;
+  });
+  */
+  let region_bg_colors = Array(5).fill().map((x,i) => {
+    let gray = 20 + i * 5;
+    return [(gray)/255,(gray)/255,(gray+10)/255];
+  });
+
+  function processLand(geometry) {
+    for(let i = 0; i < geometry.vertices.length; i++) {
+      let v = geometry.vertices[i];
+      if(v.z > 0.0) {
+        v_min_x = Math.min(v.x, v_min_x);
+        v_min_y = Math.min(v.y, v_min_y);
+        v_max_x = Math.max(v.x, v_max_x);
+        v_max_y = Math.max(v.y, v_max_y);
+      }
+    }
+  }
+
+  /*
+  function applyTerrain(h) {
+    let v_width = v_max_x - v_min_x;
+    let v_height = v_max_y - v_min_y;
+    for(let mesh of land.children) {
+      let geometry = mesh.geometry;
+      for(let i = 0; i < geometry.vertices.length; i++) {
+        let v = geometry.vertices[i];
+        if(v.z > 0.5) {
+          let x = (v.x + mesh.position.x - v_min_x) / v_width;
+          let y = (v.y + mesh.position.y - v_min_y) / v_height;
+          y = 1 - y;
+          let ix = x * img_terrain_data.width | 0;
+          let iy = y * img_terrain_data.height | 0;
+          ix = Math.min(Math.max(ix, 0), img_terrain_data.width - 1);
+          iy = Math.min(Math.max(iy, 0), img_terrain_data.height - 1);
+          let idx = iy * img_terrain_data.width + ix;
+          let z = img_terrain_data.data[idx*4+2];
+          v.z = 0.1 + z/255*h;
+        }
+      }
+
+      geometry.computeVertexNormals();
+      geometry.verticesNeedUpdate = true;
+      geometry.normalsNeedUpdate = true;  
+    }
+  }
+  */
+  
+  var tex_map = new THREE.TextureLoader().load( "./img/map.png" );
+  var tex_satmap = new THREE.TextureLoader().load( "./img/satmap.png" );
+  //var tex_alpha = new THREE.TextureLoader().load( "./img/alpha.png" );
+  
+  function applyTerrain(h) {
+    let geometry = new THREE.PlaneGeometry( v_max_x - v_min_x, v_max_y - v_min_y, 172, 250 );
+    let material = new THREE.MeshLambertMaterial( {
+      color: 0xffffff,
+      //emissive: 0xff0000,
+      side: THREE.DoubleSide,
+      map: tex_satmap,
+      //alphaMap: tex_alpha,
+      transparent: true,
+      opacity: 1,
+    } );
+    mat_terrain = material;
+    let plane = new THREE.Mesh( geometry, material );
+    mesh_terrain = plane;
+    world.add( plane );
+    
+    for(let i = 0; i < geometry.vertices.length; i++) {
+      let v = geometry.vertices[i];
+      v_min_x = Math.min(v.x, v_min_x);
+      v_min_y = Math.min(v.y, v_min_y);
+      v_max_x = Math.max(v.x, v_max_x);
+      v_max_y = Math.max(v.y, v_max_y);
+    }
+    
+    v_width = v_max_x - v_min_x;
+    v_height = v_max_y - v_min_y;
+    for(let i = 0; i < geometry.vertices.length; i++) {
+      let v = geometry.vertices[i];
+      let x = (v.x - v_min_x) / v_width;
+      let y = (v.y - v_min_y) / v_height;
+      y = 1 - y;
+      let ix = x * img_terrain_data.width | 0;
+      let iy = y * img_terrain_data.height | 0;
+      ix = Math.min(Math.max(ix, 0), img_terrain_data.width - 1);
+      iy = Math.min(Math.max(iy, 0), img_terrain_data.height - 1);
+      let idx = iy * img_terrain_data.width + ix;
+      let z = img_terrain_data.data[idx*4];
+      v.z = 0.2 + z/255*h;
+    }
+
+    geometry.computeVertexNormals();
+    geometry.verticesNeedUpdate = true;
+    geometry.normalsNeedUpdate = true;  
+  }
+  
+  function init() {
+    let paths = [];
+    for(let region of regions) {
+      let path = region.points.map((p, i) => 
+        i == 0 ? 'M'+p.join(',') : 'L'+p.join(',')
+      ).join(' ') + 'z';
+      paths.push(path);
+    }
+    
+    let amount = 0.2;
+    addExtrudeObject(land, {
+      paths: paths,
+      amounts: Array(5).fill().map(x=>amount),
+      colors: region_bg_colors,
+    }, processLand);
+    
+    applyTerrain(4);
+    
+    let geom = new THREE.IcosahedronBufferGeometry(0.3, 2);
+    
+    for(let kinder of kinders) {
+      let mat;
+      if(kinder.type == '어린이집') {
+        mat = new THREE.MeshLambertMaterial({
+          color: new THREE.Color(1,1,0),
+          emissive: new THREE.Color(0.1,0.1,0),
+          transparent: true,
+          opacity: 1,
+        });  
+      }
+      else if(kinder.type == '유치원') {
+        mat = new THREE.MeshLambertMaterial({
+          color: new THREE.Color(0,1,1),
+          emissive: new THREE.Color(0,0.1,0.1),
+          transparent: true,
+          opacity: 1,
+        });
+      }
+      let object = new THREE.Mesh(geom, mat);
+      object.position.x = kinder.point[0];
+      object.position.y = kinder.point[1];
+      //object.position.z = 0.2+0.2;
+      
+      let x = (object.position.x - v_min_x) / v_width;
+      let y = (object.position.y - v_min_y) / v_height;
+      y = 1 - y;
+      let ix = x * img_terrain_data.width | 0;
+      let iy = y * img_terrain_data.height | 0;
+      ix = Math.min(Math.max(ix, 0), img_terrain_data.width - 1);
+      iy = Math.min(Math.max(iy, 0), img_terrain_data.height - 1);
+      let idx = iy * img_terrain_data.width + ix;
+      let z = img_terrain_data.data[idx*4];
+      object.position.z = 0.4 + z/255*4;
+      
+      object.kinder = kinder;
+      object.origin = object.position.clone();
+      place.add(object);
+    }
+    
+    trail_test2();
+  }
+  
+  let frameCount = 0;
+  let kkk = false;
+  function update() {
+    //scene.children[2].children[0].rotation.x += 0.01;
+    for(let i = 0; i < place.children.length; i++) {
+      //kinders[i].update();
+      let p = place.children[i];
+      let t = (Math.sin(Date.now() * 0.001 + i)*0.5+0.5);
+      t = 1;
+      let kinder = p.kinder;
+      if(kinder.curve) {
+        if(kkk) {
+          let pt = kinder.curve.getPoint(t)
+          p.position.set(pt.x, pt.y, pt.z);
+        }
+        else {
+          p.position.set(p.origin.x, p.origin.y, p.origin.z);
+        }
+      }
+    }
+    
+    if(shader_material) {
+      shader_material.uniforms.time.value = frameCount * 0.01;
+    }
+    
+    /*
+    for(let i = 0; i < place.children.length; i++) {
+      place.children[i].position.z = 1.2 + (0.5+0.5*Math.sin(Date.now() * 0.001 + i * 2)) * 100;
+    }
+    */
+    
+    if(title.length > 0) {
+      let tt = title.shift();
+      document.querySelector('#kinder-name').textContent = tt;
+    }
+    
+    raycaster.setFromCamera( mouse, camera );
+    
+    var intersects = raycaster.intersectObjects( place.children );
+    if ( intersects.length > 0 ) {
+      if ( INTERSECTED != intersects[ 0 ].object ) {
+        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        INTERSECTED = intersects[ 0 ].object;
+        INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+        INTERSECTED.material.emissive.setHex( 0xff0000 );
+        //INTERSECTED.material.color.r = 0;
+        if(INTERSECTED.kinder) {
+          //console.log(INTERSECTED.kinder.name);
+          let a = document.querySelector('#kinder-name').textContent;
+          let b = INTERSECTED.kinder.name;
+          trans_text(a, b);
+          document.querySelector('#kinder-stat').textContent = JSON.stringify(INTERSECTED.kinder.stat, null, '\t');
+          if(indicator) {
+            indicator.position.set(INTERSECTED.position.x, INTERSECTED.position.y, INTERSECTED.position.z);
+          }
+        }
+      }
+    } else {
+      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+      INTERSECTED = null;
+    }
+    
+    //world.rotation.x += -0.01;
+    //world.rotation.y = (0.5+0.5*Math.sin(Date.now() * 0.0005)) * 0.2;
+    if(indicator) {
+      indicator.rotation.x = frameCount * 0.01;
+      indicator.rotation.y = frameCount * 0.01;
+    }
+    
+    if(frameCount % (60*30) == 0) {
+      if(Math.random() < 0.5) {
+        tf_world.to_rotation.x = -1;
+        tf_world.to_rotation.z = Math.PI / 2 + (Math.random()*1.5|0) * Math.PI *2;
+        tf_world.to_position.x = -22;
+        tf_world.dt = 0.01;
+      }
+      else {
+        tf_world.to_rotation.x = 0;
+        tf_world.to_rotation.z = 0;
+        tf_world.to_position.x = -25;
+        tf_world.dt = 0.02;
+      }
+      
+      if(Math.random() < 0.5) {
+        kkk = true;
+        trail.visible = true;
+      }
+      else {
+        kkk = false;
+        trail.visible = false;
+      }
+    }
+    
+    tf_world.update();
+    
+    frameCount++;
+  }
+  
+  function draw() {
+    renderer.render( scene, camera );
+  }
+  
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  
+  renderer.domElement.onmousemove = function(event) {
+    event.preventDefault();
+    let rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ( event.pageX / rect.width ) * 2 - 1;
+    mouse.y = - ( event.pageY / rect.height ) * 2 + 1;
+  }
+  
+  document.addEventListener('contextmenu', event => event.preventDefault());
+  
+  //let tessellateModifier = new THREE.TessellateModifier(0.5);
+  let trail = new THREE.Group();
+  world.add(trail);
+  
+  function trail_test() {
+    var curve = new THREE.CatmullRomCurve3( 
+      Array(5).fill().map((p,i) => new THREE.Vector3(
+        (Math.random()*2-1) * 10,
+        (Math.random()*2-1) * 10,
+        i * 3,
+      ))
+    );
+
+    var points = curve.getPoints( 50 );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+    /*
+    var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+    var curveObject = new THREE.Line( geometry, material );
+    world.add(curveObject);
+    */
+    
+    var material = new THREE.MeshLambertMaterial( { color: 0xff00ff } );
+    var tubeGeometry = new THREE.TubeBufferGeometry( curve, 200, 0.5, 8, false );
+    var mesh = new THREE.Mesh(tubeGeometry, material);
+    trail.add(mesh);
+  }
+  
+  function trail_test2(material) {
+    if(!material) {
+      var material = new THREE.MeshLambertMaterial( { color: 0xff00ff, transparent: true, opacity: 1 } );
+    }
+    for(let pl of place.children) {
+      let kinder = pl.kinder;
+      let gray = Math.random() * 0.2 + 0.4;
+      let d = 0;
+      if(kinder.type == '유치원') {
+        if(!kinder.nostat) {
+          d = kinder.stat.영유아및교직원.연령별학급현황.총현원|0;  
+        }
+      }
+      else {
+        d = kinder.stat.영유아및교직원.연령별반현황.총인원|0;  
+      }
+      d *= 0.02;
+      let hull = Array(4).fill().map((p,i) => new THREE.Vector3(
+        kinder.point[0] + (Math.random()*2-1) * 0.25,
+        kinder.point[1] + (Math.random()*2-1) * 0.25,
+        pl.origin.z + i * d,
+      ));
+      hull.unshift(pl.origin.clone());
+      let curve = new THREE.CatmullRomCurve3(hull);
+      kinder.curve = curve;
+      /*
+      var points = curve.getPoints( 50 );
+      var geometry = new THREE.BufferGeometry().setFromPoints( points );
+      var material = new THREE.LineBasicMaterial( { color : new THREE.Color(gray,gray,gray) } );
+      var curveObject = new THREE.Line( geometry, material );
+      world.add(curveObject);
+      */
+      
+      //var material = new THREE.MeshLambertMaterial( { color: 0xff00ff, transparent: true, opacity: 1 } );
+      var tubeGeometry = new THREE.TubeBufferGeometry( curve, 200, 0.05, 8, false );
+      var mesh = new THREE.Mesh(tubeGeometry, material);
+      trail.add(mesh);
+    }
+  }
+  
+  function trail_test3(material) {
+    if(!material) {
+      var material = new THREE.MeshLambertMaterial( { color: 0xff00ff, transparent: true, opacity: 1, side: THREE.DoubleSide, } );
+    }
+    for(let kinder of kinders) {
+      let gray = Math.random() * 0.2 + 0.4;
+      let theta = Math.random() * Math.PI;
+      let phi = Math.random() * Math.PI * 2;
+      let R = 2 + Math.random() * 3;
+      let hull = Array(4).fill().map((p,i) => {
+        let r = (i + 1) * R;
+        let x = r * Math.sin(theta) * Math.cos(phi);
+        let y = r * Math.sin(theta) * Math.sin(phi);
+        let z = r * Math.cos(theta);
+        return new THREE.Vector3(
+          x + (Math.random()*2-1) * 2,
+          y + (Math.random()*2-1) * 2,
+          z + (Math.random()*2-1) * 2,
+      )});
+      hull.unshift(new THREE.Vector3(0,0,0));
+      
+      let curve = new THREE.CatmullRomCurve3(hull);
+      kinder.curve = curve;
+      var tubeGeometry = new THREE.TubeBufferGeometry( curve, 200, 0.1, 8, false );
+      var mesh = new THREE.Mesh(tubeGeometry, material);
+      trail.add(mesh);
+    }
+    
+    mesh_terrain.visible = false;
+    land.visible = false;
+    world.position.x = 0;
+  }
+  
+  let shader_material;
+  function shader_test() {
+    let vs_str = phong_based_vs_str(
+      `
+        varying vec2 vUv;
+      `,
+      `
+        vUv = uv;
+      `
+    );
+    let fs_str = phong_based_fs_str(
+      `
+        varying vec2 vUv;
+        uniform float time;
+      `,
+      `
+        vec2 p = gl_FragCoord.xy / vec2(100.0, 100.0);
+        float ef = (sin(length(vUv - 0.5) * 10.0 - time*5.0)*0.5 + 0.5);
+        gl_FragColor = vec4( outgoingLight, diffuseColor.a ) * ef * 0.5;
+      `
+    );
+    shader_material = new THREE.ShaderMaterial( {
+      uniforms: THREE.UniformsUtils.merge([
+        THREE.ShaderLib.phong.uniforms,
+        {
+          time: { value: 1.0 },
+        }
+      ]),
+      vertexShader: vs_str,
+      fragmentShader: fs_str,
+      lights: true,
+    } );
+    
+    mat_terrain.opacity = 0;
+    land.children[1].material = shader_material;
+  }
+  
+  let indicator;
+  function indicator_test(parent) {
+    let geom = new THREE.IcosahedronBufferGeometry(0.5, 0);
+    //let sphere = new THREE.IcosahedronBufferGeometry(3, 2);
+    let mats = [
+      new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        //transparent: true,
+        opacity: 1,
+        depthWrite: true,
+      }),
+      new THREE.MeshLambertMaterial({
+        color: 0xff0000,
+        emissive: 0x1111aa,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: true,
+      }),
+      /*
+      new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        emissive: 0x1111aa,
+      }),
+      */
+    ];
+    indicator = new THREE.Object3D();
+    indicator.add(new THREE.LineSegments(new THREE.WireframeGeometry( geom ), mats[0]));
+    indicator.add(new THREE.Mesh(geom, mats[1]));
+    //indicator.add(new THREE.Mesh(sphere, mats[2]));
+    parent.add(indicator);
+  }
+  
+  let el_label = document.createElement('div');
+  el_label.className = 'label';
+  //el_stage.appendChild(el_label);
+  function label_test(name) {
+    let l = place.children.filter(p => p.kinder.name == name);
+    if(l.length > 0) {
+      let v = l[0].getWorldPosition().project(camera);
+      el_label.style.left = (1920/2*v.x + 1920/2) + 'px';
+      el_label.style.top = (-1080/2*v.y + 1080/2) + 'px';
+    }
+  }
+  
+  indicator_test(world);
+  
+  load();
+</script>
