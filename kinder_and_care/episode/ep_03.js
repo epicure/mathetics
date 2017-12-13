@@ -157,6 +157,14 @@ function build_ep_03() {
       new THREE.Vector3(1,1,1)
     ];
     anim_gens.push(gen_vec1(mesh_terrain.material, 'opacity', opacity_keys, 180));
+    
+    land.children.forEach(p => {
+      let scale_keys = [
+        p.scale.clone(),
+        new THREE.Vector3(1, 1, 1),
+      ]
+      anim_gens.push(gen_vec3(p, 'scale', scale_keys, 180));
+    });
   }
   
   let ep = {

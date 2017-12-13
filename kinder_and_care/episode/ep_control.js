@@ -52,8 +52,8 @@ function scroll_to_episode() {
 function init_episode() {
   let build_list = [
     build_ep_00,
-    //build_ep_01,
-    //build_ep_02,
+    build_ep_01,
+    build_ep_02,
     build_ep_03,
   ];
 
