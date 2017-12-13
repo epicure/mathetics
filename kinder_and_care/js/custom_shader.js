@@ -126,3 +126,29 @@ function phong_based_fs_str(head_str, body_str) {
   `;
   return fs;
 }
+
+function bg_vs_str() {
+  let vs = `
+    void main() {
+        gl_Position = vec4( position, 1.0 );
+    }
+  `;
+  return vs;
+}
+
+function bg_fs_str() {
+  let fs = `
+    uniform vec2 resolution;
+    uniform float time;
+    uniform float opacity;
+
+    void main() {
+        vec2 p = gl_FragCoord.xy/resolution;
+        p = p * 2.0 - 1.0;
+        p.x *= 3840.0 / 2160.0;
+        float d = sin(length(p) * 3.141592 * 10.0 + time);
+        gl_FragColor = vec4(vec3(d)*0.1,1.0);
+    }
+  `;
+  return fs;
+}

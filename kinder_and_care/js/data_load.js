@@ -199,6 +199,7 @@ async function load() {
       (_utmk[1]-mean_y)*scale - min_y - map_height/2
     ];
 
+    /*
     kinder.rgba = [255, 255, 255, 0];
     kinder.to_rgba = [255, 255, 255, 0];
 
@@ -212,6 +213,7 @@ async function load() {
     kinder.color = function() {
       return 'rgba('+(kinder.rgba[0]|0)+','+(kinder.rgba[1]|0)+','+(kinder.rgba[2]|0)+','+kinder.rgba[3]+')';
     }
+    */
   }
   
   init();

@@ -21,65 +21,189 @@
     height: 1080px;
     /* background-color: aquamarine; */
     /* background-image: radial-gradient(circle, yellow, #f06d06); */
+    overflow: hidden;
   }
   
   #view {
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 800px;
-    height: 1080px;
+    /* width: 800px; */
+    /* height: 1080px; */
+  }
+  
+  #view canvas {
+    position: absolute;
+    left: 0px;
+    top: 0px;
   }
   
   #story {
     position: absolute;
-    right: 0px;
+    left: 850px;
     top: 0px;
-    width: 1120px;
+    width: 1070px;
     font-size: 40px;
     line-height: 1.5em;
     color: white;
-    padding: 50px;
+    padding: 0px;
+    margin: 0px;
     box-sizing: border-box;
+    cursor: crosshair;
   }
   
-  .tag {
-    background-color: #2f2f2f;
-    cursor: pointer;
+  #story .br {
+    height: 18px;
   }
   
-  .tag.kinder {
-    border-bottom: 2px solid aquamarine;
-  }
-  
-  .tag.care {
-    border-bottom: 2px solid yellow;
-  }
-  
-  .tag.close {
-    border-bottom: 2px solid red;
-  }
-  
-  .tag.total {
-    border-bottom: 2px solid white;
-  }
-  
-  #kinder-name {
-    position: absolute;
-    top: 50px;
-    left: 0px;
+  #story .title {
+    margin-top: 100px;
     font-size: 45px;
     color: white;
   }
   
-  #kinder-stat {
+  #story .progress-container {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    width: 966px;
+    height: 2px;
+    background-color: gray;
+  }
+  
+  #story .progress {
+    width: 100%;
+    height: 2px;
+    background-color: white;
+  }
+  
+  #info {
     position: absolute;
-    top: 140px;
     left: 0px;
+    top: 1080px;
+    transition: 1s;
+    width: 1120px;
+    height: 1080px;
+    overflow: hidden;
+  }
+  
+  #kinder-stat {
     font-size: 20px;
     color: silver;
-    white-space: pre;
+    /* white-space: pre; */
     line-height: 1.25em;
+  }
+  
+  #kinder-stat p {
+    
+  }
+  
+  #kinder-stat table {
+    border-collapse: collapse;
+    /* width: 600px; */
+    font-size: 11px;
+  }
+  
+  #kinder-stat th {
+    border: 1px solid gray;
+    padding: 5px;
+    text-align: center;
+    color: white;
+    background-color: rgba(32, 32, 32, 1);
+    min-width: 150px;
+    height: 2.5em;
+    font-size: 20px;
+  }
+  
+  #kinder-stat th.care {
+    border: 1px solid gray;
+    padding: 5px;
+    text-align: center;
+    color: white;
+    background-color: rgba(32, 32, 32, 1);
+    min-width: 55px;
+    height: 2.5em;
+    font-size: 20px;
+  }
+  
+  #kinder-stat td {
+    border: 1px solid gray;
+    padding: 5px;
+    text-align: center;
+    height: 2.5em;
+    font-size: 20px;
+  }
+  
+  #episode {
+    position: absolute;
+    left: 0px;
+    top: -1080px;
+    transition: 1s;
+    width: 1120px;
+    height: 1080px;
+    overflow: hidden;
+  }
+  
+  #episode table {
+    border-collapse: collapse;
+    width: 966px;
+    font-size: 11px;
+  }
+  
+  #episode th {
+    border: 1px solid gray;
+    padding: 5px;
+    text-align: center;
+    color: white;
+    background-color: rgba(32, 32, 32, 1);
+    /* min-width: 150px; */
+    height: 2.5em;
+    font-size: 20px;
+  }
+  
+  #episode td {
+    border: 1px solid gray;
+    padding: 5px;
+    text-align: center;
+    height: 2.5em;
+    font-size: 20px;
+  }
+  
+  #chapter {
+    position: relative;
+    width: 1120px;
+    height: 1080px;
+    overflow: hidden;
+  }
+  
+  #chapter-scroll {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    transition: 1s;
+  }
+  
+  #chapter .ep {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 966px;
+  }
+  
+  #chapter .q {
+    border-bottom: 1px solid white;
+    transition: 0.5s;
+    color: white;
+    cursor: pointer;
+  }
+  
+  #chapter .q:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: black;
+  }
+  
+  #chapter ref {
+    font-size: 20px;
+    color: gray;
   }
   
   .label {
@@ -96,8 +220,22 @@
     <div id="view">
     </div>
     <div id="story">
-      <div id="kinder-name"></div>
-      <div id="kinder-stat"></div>
+      <div id="info">
+        <div id="kinder-name" class="title"></div>
+        <div class="progress-container">
+          <div class="progress"></div>
+        </div>
+        <div id="kinder-stat"></div>
+      </div>
+      <div id="episode">
+        <div class="title">&nbsp;</div>
+        <div class="progress-container">
+          <div class="progress"></div>
+        </div>
+        <div id="chapter">
+          <div id="chapter-scroll"></div>
+        </div>
+      </div>
     </div>
   </div>
 </body>
@@ -106,15 +244,38 @@
 <!--<script src="./lib/tessellatemodifier.js"></script>-->
 <script src="./js/custom_shader.js"></script>
 <script src="./js/svg_to_mesh.js"></script>
+<script src="./js/trans_text.js"></script>
 <script src="./js/data_load.js"></script>
-<script src="./js/hangul2350.js"></script>
+<script src="./js/sequence.js"></script>
+<script src="./js/table.js"></script>
+
+<script src="./episode/ep_control.js"></script>
+<script src="./episode/ep_00.js"></script>
+<script src="./episode/ep_01.js"></script>
+<script src="./episode/ep_02.js"></script>
+<script src="./episode/ep_03.js"></script>
 <script>
   let el_stage = document.querySelector('#stage');
   let el_view = document.querySelector('#view');
   let el_story = document.querySelector('#story');
+  
+  let el_info = document.querySelector('#info');
+  let el_kinder_name = document.querySelector('#kinder-name');
+  let el_info_progress = document.querySelector('#info .progress');
+  
+  let el_episode = document.querySelector('#episode');
+  let el_episode_name = document.querySelector('#episode .title');
+  let el_episode_progress = document.querySelector('#episode .progress');
+  let el_chapter = document.querySelector('#chapter');
+  let el_chapter_scroll = document.querySelector('#chapter-scroll');
+  
+  let info_title_trans = [];
+  let episode_title_trans = [];
+  let curr_episode = null;
+  
   let img_terrain, img_satmap;
   let img_terrain_data = null;
-  let mat_terrain, mesh_terrain;
+  let mesh_terrain;
   
   let mean_x = 0;
   let mean_y = 0;
@@ -132,78 +293,55 @@
   let v_width = 1;
   let v_height = 1;
   
-  let renderer;
-  let scene, camera;
+  let wait_info_dur = 60 * 8;
+  let wait_info = 0;
   
-  scene = new THREE.Scene();
-  //scene.background = new THREE.Color( 0xb00000 );
+  let wait_episode_dur = 60 * 8;
+  let wait_episode = wait_episode_dur;
+  
+  let scene = new THREE.Scene();
   let world = new THREE.Group();
   let land = new THREE.Group();
   let place = new THREE.Group();
   world.add(land);
   world.add(place);
   scene.add(world);
-  world.position.x = -25;
+  //world.position.x = -27;
   
   var mouse = new THREE.Vector2(), INTERSECTED;
   
-  renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+  let renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+  renderer.autoClear = false;
   renderer.setPixelRatio( window.devicePixelRatio );
-  //renderer.setSize( 800, 1080 );
   renderer.setSize( 1920, 1080 );
   el_view.appendChild( renderer.domElement );
   
-  /// Global : camera
-  camera = new THREE.PerspectiveCamera( 30, 1920 / 1080, 1, 1000 );
-  /*
-  let width = 800;
-  let height = 1080;
-  camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-  */
+
+  let camera = new THREE.PerspectiveCamera( 30, 1920 / 1080, 1, 1000 );
   camera.position.set( 0, 0, 100 );
   
-  /*
-  let tf_world = {
-    object: world,
-    rotation: [0, 0, 0],
-    to_rotation: [0, 0, 0],
-    position: [0, 0, 0],
-    to_position: [0, 0, 0],
-    update: function() {
-      this.rotation[0] += (this.to_rotation[0] - this.rotation[0]) * 0.1;
-      this.rotation[1] += (this.to_rotation[1] - this.rotation[1]) * 0.1;
-      this.rotation[2] += (this.to_rotation[2] - this.rotation[2]) * 0.1;
-      this.position[0] += (this.to_position[0] - this.position[0]) * 0.1;
-      this.position[1] += (this.to_position[1] - this.position[1]) * 0.1;
-      this.position[2] += (this.to_position[2] - this.position[2]) * 0.1;
-      this.object.rotation.set(this.rotation[0],this.rotation[1],this.rotation[2]);
-      this.object.position.set(this.position[0],this.position[1],this.position[2]);
+  var bg_material = new THREE.ShaderMaterial( {
+    uniforms: {
+      time: { value: 1.0 },
+      resolution: { value: new THREE.Vector2() },
+      // mouse: { type: "v2", value: new THREE.Vector2() }
     },
-  }
-  */
-  let tf_world = {
-    object: world,
-    rotation: new THREE.Vector3(),
-    to_rotation: new THREE.Vector3(),
-    position: new THREE.Vector3(),
-    to_position: new THREE.Vector3(),
-    dt: 0.05,
-    update: function() {
-      this.rotation.x += (this.to_rotation.x - this.rotation.x) * this.dt;
-      this.rotation.y += (this.to_rotation.y - this.rotation.y) * this.dt;
-      this.rotation.z += (this.to_rotation.z - this.rotation.z) * this.dt;
-      this.position.x += (this.to_position.x - this.position.x) * this.dt;
-      this.position.y += (this.to_position.y - this.position.y) * this.dt;
-      this.position.z += (this.to_position.z - this.position.z) * this.dt;
-      this.object.rotation.set(this.rotation.x,this.rotation.y,this.rotation.z);
-      this.object.position.set(this.position.x,this.position.y,this.position.z);
-    },
-  }
+    vertexShader: bg_vs_str(),
+    fragmentShader: bg_fs_str(),
+    visible: false,
+  } );
+
+  let bg_scene = new THREE.Scene();
+  let bg_camera = new THREE.Camera();
+  bg_camera.position.z = 1;
+  let bg_geometry = new THREE.PlaneBufferGeometry( 2, 2 );
+  let bg_mesh = new THREE.Mesh(bg_geometry, bg_material);
+  bg_scene.add(bg_mesh);
+  bg_material.uniforms.resolution.value = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
   
   let ambient = new THREE.AmbientLight(0x111111);
   scene.add(ambient);
 
-  //light = new THREE.SpotLight(0xffffff);
   let light = new THREE.DirectionalLight(0xffffff);
   light.position.set(10, 30, 100);
   light.target.position.set(0, 0, 0);
@@ -218,12 +356,6 @@
   window.onresize = layout;
   layout();
   
-  /*
-  let region_bg_colors = Array(5).fill().map((x,i) => {
-    let gray = 40 + i * 8;
-    return `rgb(${gray},${gray},${gray+10})`;
-  });
-  */
   let region_bg_colors = Array(5).fill().map((x,i) => {
     let gray = 20 + i * 5;
     return [(gray)/255,(gray)/255,(gray+10)/255];
@@ -283,9 +415,9 @@
       map: tex_satmap,
       //alphaMap: tex_alpha,
       transparent: true,
+      depthWrite: false,
       opacity: 1,
     } );
-    mat_terrain = material;
     let plane = new THREE.Mesh( geometry, material );
     mesh_terrain = plane;
     world.add( plane );
@@ -313,6 +445,8 @@
       let z = img_terrain_data.data[idx*4];
       v.z = 0.2 + z/255*h;
     }
+    
+    mesh_terrain.material.opacity = 0;
 
     geometry.computeVertexNormals();
     geometry.verticesNeedUpdate = true;
@@ -335,27 +469,31 @@
       colors: region_bg_colors,
     }, processLand);
     
+    for(let i = 0; i < regions.length; i++) {
+      land.children[i].name = regions[i].name;
+      land.children[i].color = region_bg_colors[i];
+    }
+    
     applyTerrain(4);
     
-    let geom = new THREE.IcosahedronBufferGeometry(0.3, 2);
+    let geom_kinder = new THREE.IcosahedronBufferGeometry(0.3, 1);
+    let geom_care = new THREE.BoxBufferGeometry(0.4, 0.4, 0.4);
     
     for(let kinder of kinders) {
-      let mat;
+      let mat, geom;
       if(kinder.type == '어린이집') {
         mat = new THREE.MeshLambertMaterial({
           color: new THREE.Color(1,1,0),
           emissive: new THREE.Color(0.1,0.1,0),
-          transparent: true,
-          opacity: 1,
-        });  
+        });
+        geom = geom_care;
       }
       else if(kinder.type == '유치원') {
         mat = new THREE.MeshLambertMaterial({
           color: new THREE.Color(0,1,1),
           emissive: new THREE.Color(0,0.1,0.1),
-          transparent: true,
-          opacity: 1,
         });
+        geom = geom_kinder;
       }
       let object = new THREE.Mesh(geom, mat);
       object.position.x = kinder.point[0];
@@ -378,11 +516,17 @@
       place.add(object);
     }
     
-    trail_test2();
+    // trail_test2();
+    //tf_world.to_position.x = -25;
+    init_episode();
   }
   
   let frameCount = 0;
   let kkk = false;
+  //let info_timeout = null;
+  let anim_gens = [];
+  let anim_gens_finshed = () => {};
+  
   function update() {
     //scene.children[2].children[0].rotation.x += 0.01;
     for(let i = 0; i < place.children.length; i++) {
@@ -412,9 +556,14 @@
     }
     */
     
-    if(title.length > 0) {
-      let tt = title.shift();
-      document.querySelector('#kinder-name').textContent = tt;
+    if(info_title_trans.length > 0) {
+      let tt = info_title_trans.shift();
+      el_kinder_name.textContent = tt;
+    }
+    
+    if(episode_title_trans.length > 0) {
+      let tt = episode_title_trans.shift();
+      el_episode_name.textContent = tt;
     }
     
     raycaster.setFromCamera( mouse, camera );
@@ -426,16 +575,24 @@
         INTERSECTED = intersects[ 0 ].object;
         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
         INTERSECTED.material.emissive.setHex( 0xff0000 );
-        //INTERSECTED.material.color.r = 0;
         if(INTERSECTED.kinder) {
-          //console.log(INTERSECTED.kinder.name);
           let a = document.querySelector('#kinder-name').textContent;
           let b = INTERSECTED.kinder.name;
-          trans_text(a, b);
-          document.querySelector('#kinder-stat').textContent = JSON.stringify(INTERSECTED.kinder.stat, null, '\t');
+          info_title_trans = trans_text(a, b);
+          
+          if(INTERSECTED.kinder.type == '유치원') {
+            build_kinder_table(document.querySelector('#kinder-stat'), INTERSECTED.kinder);  
+          }
+          if(INTERSECTED.kinder.type == '어린이집') {
+            build_care_table(document.querySelector('#kinder-stat'), INTERSECTED.kinder);  
+          }
+          
           if(indicator) {
             indicator.position.set(INTERSECTED.position.x, INTERSECTED.position.y, INTERSECTED.position.z);
+            indicator.visible = true;
           }
+          
+          scroll_to_info();
         }
       }
     } else {
@@ -450,6 +607,7 @@
       indicator.rotation.y = frameCount * 0.01;
     }
     
+    /*
     if(frameCount % (60*30) == 0) {
       if(Math.random() < 0.5) {
         tf_world.to_rotation.x = -1;
@@ -473,13 +631,54 @@
         trail.visible = false;
       }
     }
+    */
     
-    tf_world.update();
+    if(wait_info > 0) {
+      wait_info--;
+      let t = wait_info / wait_info_dur;
+      el_info_progress.style.width = t * 100 + '%';
+      if(wait_info == 0) {
+        scroll_to_episode();
+      }
+    }
+    
+    if(wait_episode > 0) {
+      if(wait_info == 0) {
+        wait_episode--;  
+      }
+      let t = wait_episode / wait_episode_dur;
+      el_episode_progress.style.width = t * 100 + '%';
+      if(wait_episode == 0) {
+        // episode 넘어갈 때
+        goto_next_episode();
+      }
+    }
+    
+    //tf_world.update();
+    
+    for(let gen of anim_gens) {
+      gen.next();
+    }
+    
+    if(anim_gens.length > 0) {
+      anim_gens.filter(ag => ag.next().done).forEach(x => {
+        let idx = anim_gens.indexOf(x);
+        anim_gens.splice(idx, 1);
+      });
+      if(anim_gens.length == 0) {
+        anim_gens_finshed();
+      }
+    }
+    
+    bg_material.uniforms.time.value = frameCount * 0.01;
     
     frameCount++;
   }
   
   function draw() {
+    renderer.clear();
+    renderer.render( bg_scene, bg_camera );
+    renderer.clearDepth();
     renderer.render( scene, camera );
   }
   
@@ -632,7 +831,7 @@
       lights: true,
     } );
     
-    mat_terrain.opacity = 0;
+    mesh_terrain.material.opacity = 0;
     land.children[1].material = shader_material;
   }
   
@@ -666,6 +865,7 @@
     indicator.add(new THREE.LineSegments(new THREE.WireframeGeometry( geom ), mats[0]));
     indicator.add(new THREE.Mesh(geom, mats[1]));
     //indicator.add(new THREE.Mesh(sphere, mats[2]));
+    indicator.visible = false;
     parent.add(indicator);
   }
   
