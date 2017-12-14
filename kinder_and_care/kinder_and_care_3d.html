@@ -24,6 +24,17 @@
     overflow: hidden;
   }
   
+  #warn {
+    position: absolute;
+    bottom: 0px;
+    width: 1920px;
+    left: 0px;
+    text-align: center;
+    padding: 10px;
+    color: white;
+    transition: 0.5s;
+  }
+  
   #view {
     position: absolute;
     left: 0px;
@@ -133,6 +144,19 @@
     font-size: 20px;
   }
   
+  #info .close {
+    transition: 0.5s;
+    width: 1em;
+    text-align: center;
+    border-bottom: 1px solid white;
+    cursor: pointer;
+  }
+  
+  #info .close:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: black;
+  }
+  
   #episode {
     position: absolute;
     left: 0px;
@@ -154,7 +178,7 @@
     padding: 5px;
     text-align: center;
     color: white;
-    background-color: rgba(32, 32, 32, 1);
+    background-color: rgba(200, 200, 200, 0.2);
     /* min-width: 150px; */
     height: 2.5em;
     font-size: 20px;
@@ -202,8 +226,14 @@
   }
   
   #chapter ref {
+    display: block;
     font-size: 20px;
     color: gray;
+  }
+  
+  #chapter next {
+    position: absolute;
+    right: 0px;
   }
   
   .label {
@@ -219,6 +249,7 @@
   <div id="stage">
     <div id="view">
     </div>
+    <div id="warn"></div>
     <div id="story">
       <div id="info">
         <div id="kinder-name" class="title"></div>
@@ -226,6 +257,7 @@
           <div class="progress"></div>
         </div>
         <div id="kinder-stat"></div>
+        <div class="close">↓</div>
       </div>
       <div id="episode">
         <div class="title">&nbsp;</div>
@@ -254,14 +286,18 @@
 <script src="./episode/ep_01.js"></script>
 <script src="./episode/ep_02.js"></script>
 <script src="./episode/ep_03.js"></script>
+<script src="./episode/ep_04.js"></script>
+
 <script>
   let el_stage = document.querySelector('#stage');
+  let el_warn = document.querySelector('#warn');
   let el_view = document.querySelector('#view');
   let el_story = document.querySelector('#story');
   
   let el_info = document.querySelector('#info');
   let el_kinder_name = document.querySelector('#kinder-name');
   let el_info_progress = document.querySelector('#info .progress');
+  let el_info_close = document.querySelector('#info .close');
   
   let el_episode = document.querySelector('#episode');
   let el_episode_name = document.querySelector('#episode .title');
@@ -322,13 +358,14 @@
   
   var bg_material = new THREE.ShaderMaterial( {
     uniforms: {
-      time: { value: 1.0 },
       resolution: { value: new THREE.Vector2() },
-      // mouse: { type: "v2", value: new THREE.Vector2() }
+      time: { value: 1.0 },
+      brightness: { value: 1.0 },
+      mouse: { value: new THREE.Vector2() },
     },
     vertexShader: bg_vs_str(),
     fragmentShader: bg_fs_str(),
-    visible: false,
+    visible: true,
   } );
 
   let bg_scene = new THREE.Scene();
@@ -523,7 +560,6 @@
   
   let frameCount = 0;
   let kkk = false;
-  //let info_timeout = null;
   let anim_gens = [];
   let anim_gens_finshed = () => {};
   
@@ -636,7 +672,7 @@
     if(wait_info > 0) {
       wait_info--;
       let t = wait_info / wait_info_dur;
-      el_info_progress.style.width = t * 100 + '%';
+      el_info_progress.style.width = (1-t) * 100 + '%';
       if(wait_info == 0) {
         scroll_to_episode();
       }
@@ -647,7 +683,7 @@
         wait_episode--;  
       }
       let t = wait_episode / wait_episode_dur;
-      el_episode_progress.style.width = t * 100 + '%';
+      el_episode_progress.style.width = (1-t) * 100 + '%';
       if(wait_episode == 0) {
         // episode 넘어갈 때
         goto_next_episode();
@@ -667,10 +703,15 @@
       });
       if(anim_gens.length == 0) {
         anim_gens_finshed();
+        if(el_warn.style.opacity != '0') {
+          el_warn.style.transition = '3s';
+          el_warn.style.opacity = 0;
+        }
       }
     }
     
     bg_material.uniforms.time.value = frameCount * 0.01;
+    bg_material.uniforms.mouse.value = mouse;
     
     frameCount++;
   }
@@ -688,7 +729,7 @@
     requestAnimationFrame(loop);
   }
   
-  renderer.domElement.onmousemove = function(event) {
+  window.onmousemove = function(event) {
     event.preventDefault();
     let rect = renderer.domElement.getBoundingClientRect();
     mouse.x = ( event.pageX / rect.width ) * 2 - 1;
@@ -880,6 +921,14 @@
       el_label.style.top = (-1080/2*v.y + 1080/2) + 'px';
     }
   }
+  
+  let info_close_timeout;
+  el_info_close.onmouseover = function(e) {
+    if(info_close_timeout) {
+      clearTimeout(info_close_timeout);
+    }
+    info_close_timeout = setTimeout(scroll_to_episode, 300);
+  };
   
   indicator_test(world);
   

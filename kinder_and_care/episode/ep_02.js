@@ -29,9 +29,9 @@ function build_ep_02() {
         </tbody>
       </table>
     </p>
-    <p>만 0세는 2017년생이고, 만 5세는 2012년생 입니다. 2012년생이 2018년에 초등학교에 입학합니다.</p>
+    <p>만 0세는 2017년생이고, 만 5세는 2012년생 입니다. 2012년생이 2018년 3월에 초등학교에 입학합니다.</p>
     <p>2017년 11월 현재로 보면 2017년생이 가장 적네요.</p>
-    <p><next>다음 →</next></p>
+    <p><next>→</next></p>
   `;
   el.innerHTML = html;
   
@@ -41,9 +41,8 @@ function build_ep_02() {
     q.className = 'q';
     q.style['border-bottom'] = '2px solid rgb(255,255,255)';
     q.onmouseover = function(e) {
-      wait_episode = wait_episode_dur*0.75|0;
-      if(anim_gens.length > 0) return;
-      goto_next_episode();  
+      if(prevent_when_anim_go()) return;
+      wait_episode = 20; 
     }
   });
   

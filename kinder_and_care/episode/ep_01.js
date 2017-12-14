@@ -2,10 +2,10 @@ function build_ep_01() {
   let el = document.createElement('div');
   el.className = 'ep';
   let html = `
-    <p>노원구는 <q0>상계동</q0>, <q0>중계동</q0>, <q0>하계동</q0>, <q0>공릉동</q0>, <q0>월계동</q0>의 다섯개의 동으로 이루어져있습니다.</p>
-    <p>2017년 11월 현재 노원구의 총 인구는 555,775명이며 217,860 세대가 살고있고 남자는 270,218명, 여자는 285,557명으로 세대당 2.55명이 살고 있습니다.</p>
+    <p>노원구는 <q0>상계동</q0>, <q0>중계동</q0>, <q0>하계동</q0>, <q0>월계동</q0>, <q0>공릉동</q0>의 다섯개의 동으로 이루어져있습니다.</p>
+    <p>2017년 11월 현재 노원구의 총 인구는 555,775명이며 217,860 세대가 살고있고 주민등록상에 나타나는 성별구분의 남성은 270,218명, 여성은 285,557명으로 세대당 2.55명이 살고 있습니다.</p>
     <ref>행정안전부 주민등록 인구통계: http://www.mois.go.kr/frt/sub/a05/totStat/screen.do</ref>
-    <p><next>다음 →</next></p>
+    <p><next>→</next></p>
   `;
   el.innerHTML = html;
   
@@ -15,9 +15,8 @@ function build_ep_01() {
     q.className = 'q';
     q.style['border-bottom'] = '2px solid rgb(255,255,255)';
     q.onmouseover = function(e) {
-      wait_episode = wait_episode_dur*0.75|0;
-      if(anim_gens.length > 0) return;
-      goto_next_episode();  
+      if(prevent_when_anim_go()) return;
+      wait_episode = 20; 
     }
   });
   

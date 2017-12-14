@@ -5,7 +5,7 @@ function build_ep_00() {
     <p style="font-family: 'BM JUA_OTF'; letter-spacing: 0.1em;">아이참 재미있어~ 우리 유치원~</p>
     <p style="font-family: 'BM JUA_OTF'; letter-spacing: 0.1em;">벌써 갈 시간이 다 되었네...</p>
     <p>어린이들이 유치원을 하원할 때 부르곤 하는 이 노래 기억하세요? 노원구의 인구와 유치원 그리고 어린이집에 관한 데이터를 렌즈로 이 시대의 한 측면을 살펴보고자 합니다.</p>
-    <p>혹시 한 때가 저물고 있는 징후가 나타나고 있진 않을까요?</p>
+    <p>혹시 한 때가 저물어 다음으로 나아가야 할 징후가 나타나고 있진 않을까요?</p>
     <p>밑줄이 있는 글에 마우스를 올려 데이터를 탐험해 보세요.</p>
     <p><next>다음 →</next></p>
   `;
@@ -17,9 +17,8 @@ function build_ep_00() {
     q.className = 'q';
     q.style['border-bottom'] = '2px solid rgb(255,255,255)';
     q.onmouseover = function(e) {
-      wait_episode = wait_episode_dur*0.75|0;
-      if(anim_gens.length > 0) return;
-      goto_next_episode();  
+      if(prevent_when_anim_go()) return;
+      wait_episode = 20; 
     }
   });
   

@@ -1,18 +1,114 @@
-function build_ep_03() {
+function build_ep_04() {
   let el = document.createElement('div');
   el.className = 'ep';
+  el.style.fontSize = '30px';
   
-  let num_kinder = place.children.filter(p => p.kinder.type == '유치원').length;
-  let num_care = place.children.filter(p => p.kinder.type == '어린이집').length;
-  let num_closed = place.children.filter(p => p.kinder.status == '폐원').length;
-  let num_school = num_kinder + num_care - num_closed;
+  /*
+  "사립(사인)",
+  "사립(법인)",
+  "공립(병설)",
+  "공립(단설)",
+  "가정",
+  "민간",
+  "국공립",
+  "직장",
+  "사회복지법인",
+  "법인·단체등",
+  "협동"
+  */
+  let care_forms = '국공립,가정,민간,직장,협동,사회복지법인,법인·단체등'.split(',');
+  let kinder_forms = '공립(병설),공립(단설),사립(사인),사립(법인)'.split(',');
+  
+  let nc = {};
+  care_forms.forEach(c => nc[c] = 0);
+  let nk = {};
+  kinder_forms.forEach(k => nk[k] = 0);
+  
+  let cnc = {};
+  care_forms.forEach(c => cnc[c] = 0);
+  let cnk = {};
+  kinder_forms.forEach(k => cnk[k] = 0);
+  
+  kinders.forEach(k => {
+    if(k.type == '어린이집') {
+      nc[k.form]++;
+      cnc[k.form] += k.stat.영유아및교직원.연령별반현황.총인원|0;
+    }
+    else if(k.type == '유치원' && !k.nostat) {
+      nk[k.form]++;
+      cnk[k.form] += k.stat.영유아및교직원.연령별학급현황.총현원|0;
+    }
+  });
   
   let html = `
-    <p>노원구에는 <q0>${num_care}개의 어린이집</q0>과 <q1>${num_kinder}개의 유치원</q1>이 있고, 그 중 상계동에 있는 <q2>${num_closed}개 유치원</q2>이 최근 몇 년 사이에 폐원을 해서 총 <q3>${num_school}개</q3>의 보육과 교육을 맡길 수 있는 기관이 운영 중 입니다.</p>
-    <p>2017년에도 <q4>상계동</q4>에 있는 <q5>한 유치원</q5>의 폐원 이슈에 관한 기사가 나기도 했죠.</p>
-    <ref>상계동 폐원 갈등 유치원: https://www.youtube.com/watch?v=CMJHmwUGIOc</ref>
-    <ref>상계동 유치원 폐원 위기 넘겼다: http://www.yonhap21.com/detail.php?number=12643</ref>
-    <p>왼쪽 지도에 나타나는 표시에 마우스를 올려 어린이집과 유치원의 정보를 좀 더 자세히 탐색할 수 있습니다.</p>
+    <p>어린이집은 <q0>국공립</q0>, <q0>가정</q0>, <q0>민간</q0>, <q0>직장</q0>, <q0>협동</q0>, <q0>사회복지법인</q0>, <q0>법인·단체등</q0>의 일곱 가지 유형이 있고,</p>
+
+    <p>
+      <table>
+        <tbody>
+          <tr>
+            <th>어린이집 유형</th>
+            <th>국공립</th>
+            <th>가정</th>
+            <th>민간</th>
+            <th>직장</th>
+            <th>협동</th>
+            <th>사회복지법인</th>
+            <th>법인·단체등</th>
+          </tr>
+          <tr>
+            <th>기관수</th>
+            <td>${nc['국공립']}</td>
+            <td>${nc['가정']}</td>
+            <td>${nc['민간']}</td>
+            <td>${nc['직장']}</td>
+            <td>${nc['협동']}</td>
+            <td>${nc['사회복지법인']}</td>
+            <td>${nc['법인·단체등']}</td>
+          </tr>
+          <tr>
+            <th>어린이수</th>
+            <td>${cnc['국공립']}</td>
+            <td>${cnc['가정']}</td>
+            <td>${cnc['민간']}</td>
+            <td>${cnc['직장']}</td>
+            <td>${cnc['협동']}</td>
+            <td>${cnc['사회복지법인']}</td>
+            <td>${cnc['법인·단체등']}</td>
+          </tr>
+        </tbody>
+      </table>
+    </p>
+
+    <p>유치원은 <q0>공립(병설)</q0>, <q0>공립(단설)</q0>, <q0>사립(사인)</q0>, <q0>사립(법인)</q0>의 네 가지 유형이 있습니다.</p>
+
+
+      <table>
+        <tbody>
+          <tr>
+            <th>유치원 유형</th>
+            <th>공립(병설)</th>
+            <th>공립(단설)</th>
+            <th>사립(사인)</th>
+            <th>사립(법인)</th>
+          </tr>
+          <tr>
+            <th>기관수</th>
+            <td>${nk['공립(병설)']}</td>
+            <td>${nk['공립(단설)']}</td>
+            <td>${nk['사립(사인)']}</td>
+            <td>${nk['사립(법인)']}</td>
+          </tr>
+          <tr>
+            <th>어린이수</th>
+            <td>${cnk['공립(병설)']}</td>
+            <td>${cnk['공립(단설)']}</td>
+            <td>${cnk['사립(사인)']}</td>
+            <td>${cnk['사립(법인)']}</td>
+          </tr>
+        </tbody>
+      </table>
+
     <p><next>→</next></p>
   `;
   el.innerHTML = html;
@@ -30,26 +126,37 @@ function build_ep_03() {
   
   el.querySelectorAll('q0').forEach(q => {
     q.className = 'q';
-    q.style['border-bottom'] = '2px solid rgb(255,255,0)';
+    if(care_forms.includes(q.textContent)) {
+      q.style['border-bottom'] = '2px solid rgb(255,255,0)';
+    }
+    else if(kinder_forms.includes(q.textContent)) {
+      q.style['border-bottom'] = '2px solid rgb(0,255,255)';
+    }
+    
     q.onmouseover = function(e) {
       wait_episode = wait_episode_dur*0.75|0;
       if(prevent_when_anim_go()) return;
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        if(p.kinder.type == '유치원') {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
-        else if(p.kinder.type == '어린이집') {
+        let shrink = p.kinder.status == '폐원';
+        if(p.kinder.form == q.textContent) {
           let scale_keys = [
             p.scale.clone(),
             new THREE.Vector3(2, 2, 2),
             new THREE.Vector3(1, 1, 1),
+          ] 
+          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
+        }
+        else {
+          shrink = true;
+        }
+        
+        if (shrink) {
+          let scale_keys = [
+            p.scale.clone(),
+            new THREE.Vector3(2, 2, 2),
+            new THREE.Vector3(0.001, 0.001, 0.001),
           ] 
           anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
         }
@@ -220,9 +327,9 @@ function build_ep_03() {
   function begin() {
     let opacity_keys = [
       new THREE.Vector3(mesh_terrain.material.opacity,0,0),
-      new THREE.Vector3(1,1,1)
+      new THREE.Vector3(0,0,0)
     ];
-    anim_gens.push(gen_vec1(mesh_terrain.material, 'opacity', opacity_keys, 180));
+    anim_gens.push(gen_vec1(mesh_terrain.material, 'opacity', opacity_keys, 30));
     
     land.children.forEach(p => {
       let scale_keys = [
@@ -252,7 +359,7 @@ function build_ep_03() {
   }
   
   let ep = {
-    name: '노원구의 어린이집과 유치원',
+    name: '어린이집과 유치원의 유형',
     dur: 30,
     el: el,
     begin: begin,

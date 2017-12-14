@@ -32,6 +32,7 @@ function goto_next_episode() {
       if(idx > episode_list.length - 1) {
         idx = 0;
       }
+      //setTimeout(() => goto_episode_by_index(idx), 500);
       goto_episode_by_index(idx);
     }
   }
@@ -49,12 +50,28 @@ function scroll_to_episode() {
   indicator.visible = false;
 }
 
+function prevent_when_anim_go() {
+  let res = false;
+  if(anim_gens.length > 0) {
+    res = true;
+    el_warn.textContent = '잠시 기다렸다가 마우스를 다시 올려주세요';
+    el_warn.style.transition = '0.5s';
+    el_warn.style.opacity = 1;
+  }
+  else {
+    el_warn.style.transition = '0.5s';
+    el_warn.style.opacity = 0;
+  }
+  return res;
+}
+
 function init_episode() {
   let build_list = [
     build_ep_00,
     build_ep_01,
     build_ep_02,
     build_ep_03,
+    build_ep_04,
   ];
 
   build_list.forEach((build, i) => {

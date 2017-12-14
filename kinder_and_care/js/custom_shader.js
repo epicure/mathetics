@@ -140,14 +140,19 @@ function bg_fs_str() {
   let fs = `
     uniform vec2 resolution;
     uniform float time;
-    uniform float opacity;
+    uniform float brightness;
+    uniform vec2 mouse;
+    const float pi = 3.14159265358979;
 
     void main() {
         vec2 p = gl_FragCoord.xy/resolution;
+        vec2 m = vec2(mouse.x, mouse.y);
         p = p * 2.0 - 1.0;
-        p.x *= 3840.0 / 2160.0;
-        float d = sin(length(p) * 3.141592 * 10.0 + time);
-        gl_FragColor = vec4(vec3(d)*0.1,1.0);
+        p.x *= resolution.x / resolution.y;
+        m.x *= resolution.x / resolution.y;
+        float d = length(p - m);
+        float c = (sin(d * pi * 5.0 - time)*0.5+0.5) * (1.0 - d);
+        gl_FragColor = vec4(vec3(c)*brightness*0.2,1.0);
     }
   `;
   return fs;
