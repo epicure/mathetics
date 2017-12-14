@@ -23,8 +23,26 @@ function build_ep_00() {
   });
   
   function begin() {
+    let cam_pos_keys = [
+      camera.position.clone(),
+      new THREE.Vector3(0, 0, 100),
+    ];
+    anim_gens.push(gen_vec3(camera, 'position', cam_pos_keys, 100));
+    
     place.children.forEach(p => {
-      p.scale.set(0.001, 0.001, 0.001);
+      let scale_keys = [
+            p.scale.clone(),
+        new THREE.Vector3(0.001, 0.001, 0.001),
+      ];
+      anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
+      
+      let pos_keys = [
+        p.position.clone(),
+        p.origin.clone(),
+      ];
+      let dur = 30+Math.random()*60|0;
+      p.segment.scale.set(1,1,0.001);
+      anim_gens.push(gen_vec3(p, 'position', pos_keys, dur));
     });
 
     let opacity_keys = [
@@ -48,10 +66,12 @@ function build_ep_00() {
       new THREE.Vector3(0,0,0 + Math.PI*2)
     ];
     anim_gens.push(gen_vec3(world, 'rotation', rot_keys, 300));
+    /*
     let seqs = [
-      { task: () => { world.rotation.set(0, 0, 0); }, time: 5.5 }
+      { task: () => { world.rotation.set(0, 0, 0); }, time: 5.1 }
     ];
     do_sequences(seqs);
+    */
 
     let pos_keys = [
       world.position.clone(),

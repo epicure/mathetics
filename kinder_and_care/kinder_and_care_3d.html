@@ -55,7 +55,7 @@
     top: 0px;
     width: 1070px;
     font-size: 40px;
-    line-height: 1.5em;
+    line-height: 1.25em;
     color: white;
     padding: 0px;
     margin: 0px;
@@ -287,6 +287,8 @@
 <script src="./episode/ep_02.js"></script>
 <script src="./episode/ep_03.js"></script>
 <script src="./episode/ep_04.js"></script>
+<script src="./episode/ep_05.js"></script>
+<script src="./episode/ep_06.js"></script>
 
 <script>
   let el_stage = document.querySelector('#stage');
@@ -339,8 +341,10 @@
   let world = new THREE.Group();
   let land = new THREE.Group();
   let place = new THREE.Group();
+  let segment = new THREE.Group();
   world.add(land);
   world.add(place);
+  world.add(segment);
   scene.add(world);
   //world.position.x = -27;
   
@@ -551,6 +555,8 @@
       object.kinder = kinder;
       object.origin = object.position.clone();
       place.add(object);
+      
+      addSegment(object);
     }
     
     // trail_test2();
@@ -908,6 +914,30 @@
     //indicator.add(new THREE.Mesh(sphere, mats[2]));
     indicator.visible = false;
     parent.add(indicator);
+  }
+  
+  function addSegment(object) {
+    var curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(object.origin.x, object.origin.y, 0),
+      new THREE.Vector3(object.origin.x, object.origin.y, 1),
+    ]);
+
+    var points = curve.getPoints( 2 );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    
+    var material = new THREE.LineBasicMaterial( { color : 0xffffff } );
+    var curveObject = new THREE.Line( geometry, material );
+    //curveObject.scale.set(0.001, 0.001, 0.001);
+    
+    curveObject.scale.set(1,1,0.001);
+    
+    segment.add(curveObject);
+    
+    //var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    //var material = new THREE.MeshLambertMaterial( { color: 0xff00ff } );
+    //var tubeGeometry = new THREE.TubeBufferGeometry( curve, 200, 0.5, 8, false );
+    //var mesh = new THREE.Mesh(tubeGeometry, material);
+    object.segment = curveObject;
   }
   
   let el_label = document.createElement('div');

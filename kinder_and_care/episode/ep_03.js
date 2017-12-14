@@ -1,18 +1,22 @@
 function build_ep_03() {
   let el = document.createElement('div');
   el.className = 'ep';
+  el.style.fontSize = '30px';
   
   let num_kinder = place.children.filter(p => p.kinder.type == '유치원').length;
   let num_care = place.children.filter(p => p.kinder.type == '어린이집').length;
   let num_closed = place.children.filter(p => p.kinder.status == '폐원').length;
   let num_school = num_kinder + num_care - num_closed;
+  let kid_per = num_kid_in_school/num_kid_population*100;
   
   let html = `
     <p>노원구에는 <q0>${num_care}개의 어린이집</q0>과 <q1>${num_kinder}개의 유치원</q1>이 있고, 그 중 상계동에 있는 <q2>${num_closed}개 유치원</q2>이 최근 몇 년 사이에 폐원을 해서 총 <q3>${num_school}개</q3>의 보육과 교육을 맡길 수 있는 기관이 운영 중 입니다.</p>
+    <p>노원구의 ${sp3(num_kid_population)}명의 만0세 부터 만5세 어린이들 중 ${Math.round(kid_per)}%인 ${sp3(num_kid_in_school)}명이 이 어린이집과 유치원을 다니고 있는데, 그러면 나머지 ${Math.round(100-kid_per)}%인 ${sp3(num_kid_population - num_kid_in_school)}명의 어린이들은 어디에 있는 것일까요?</p>
     <p>2017년에도 <q4>상계동</q4>에 있는 <q5>한 유치원</q5>의 폐원 이슈에 관한 기사가 나기도 했죠.</p>
     <ref>상계동 폐원 갈등 유치원: https://www.youtube.com/watch?v=CMJHmwUGIOc</ref>
     <ref>상계동 유치원 폐원 위기 넘겼다: http://www.yonhap21.com/detail.php?number=12643</ref>
-    <p>왼쪽 지도에 나타나는 표시에 마우스를 올려 어린이집과 유치원의 정보를 좀 더 자세히 탐색할 수 있습니다.</p>
+    <p>유치원의 갑작스러운 폐원은 여러가지 복잡한 문제를 일으킬 수 있습니다.</p>
+    <p>왼쪽 지도에 나타나는 표시에 마우스를 올려 어린이집과 유치원의 정보를 좀 더 자세히 탐색할 수 있어요.</p>
     <p><next>→</next></p>
   `;
   el.innerHTML = html;

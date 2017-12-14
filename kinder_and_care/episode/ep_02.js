@@ -1,6 +1,8 @@
 function build_ep_02() {
   let el = document.createElement('div');
   el.className = 'ep';
+  el.style.fontSize = '30px';
+  
   let html = `
     <p>노원구의 총 인구 555,775명 중 만 0세에서 만 5세 까지의 어린이 인구는 23,547명 입니다. 이 어린이들을 자녀로 둔 약 2만 가정의 엄마인 여성이 있다고 추정해 볼 수 있겠죠.</p>
     <p>
