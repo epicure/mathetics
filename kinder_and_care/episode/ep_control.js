@@ -20,22 +20,19 @@ let num_kid_in_school;
 
 let limit_c, limit_k;
 
-function get_kinder_limit(kinder) {
+function get_kinder_jungwon(kinder) {
   let n = 0;
-  if(!kinder.nostat) {
-    let nj = [
-      kinder.stat.영유아및교직원.연령별학급현황.연령별.만3세.모집정원|0,
-      kinder.stat.영유아및교직원.연령별학급현황.연령별.만4세.모집정원|0,
-      kinder.stat.영유아및교직원.연령별학급현황.연령별.만5세.모집정원|0,
-    ];
-    n = nj.reduce((a,b)=>a+b);
+  if(kinder.type == '유치원') {
+    if(!kinder.nostat) {
+      let nj = [
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만3세.모집정원|0,
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만4세.모집정원|0,
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만5세.모집정원|0,
+      ];
+      n = nj.reduce((a,b)=>a+b);
+    }
   }
-  return n;
-}
-
-function get_care_limit(kinder) {
-  let n = 0;
-  if(!kinder.nostat) {
+  else if(kinder.type == '어린이집') {
     let nj = [
       kinder.stat.영유아및교직원.연령별반현황.연령별.만0세['정원']|0,
       kinder.stat.영유아및교직원.연령별반현황.연령별.만1세['정원']|0,
@@ -47,6 +44,36 @@ function get_care_limit(kinder) {
       kinder.stat.영유아및교직원.연령별반현황.연령별['유아혼합']['정원']|0,
       kinder.stat.영유아및교직원.연령별반현황.연령별['특수/장애아']['정원']|0,
       kinder.stat.영유아및교직원.연령별반현황.연령별['기타']['정원']|0,
+    ];
+    n = nj.reduce((a,b)=>a+b);
+  }
+  return n;
+}
+
+function get_kinder_hyunwon(kinder) {
+  let n = 0;
+  if(kinder.type == '유치원') {
+    if(!kinder.nostat) {
+      let nj = [
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만3세.현원|0,
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만4세.현원|0,
+        kinder.stat.영유아및교직원.연령별학급현황.연령별.만5세.현원|0,
+      ];
+      n = nj.reduce((a,b)=>a+b);
+    }
+  }
+  else if(kinder.type == '어린이집') {
+    let nj = [
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만0세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만1세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만2세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만3세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만4세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별.만5세['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별['영아혼합']['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별['유아혼합']['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별['특수/장애아']['현원']|0,
+      kinder.stat.영유아및교직원.연령별반현황.연령별['기타']['현원']|0,
     ];
     n = nj.reduce((a,b)=>a+b);
   }
@@ -76,12 +103,12 @@ function init_episode_variables () {
     if(k.type == '어린이집') {
       nc[k.form]++;
       cnc[k.form] += k.stat.영유아및교직원.연령별반현황.총인원|0;
-      limit_c[k.form] += get_care_limit(k);
+      limit_c[k.form] += get_kinder_jungwon(k);
     }
     else if(k.type == '유치원' && !k.nostat) {
       nk[k.form]++;
       cnk[k.form] += k.stat.영유아및교직원.연령별학급현황.총현원|0;
-      limit_k[k.form] += get_kinder_limit(k);
+      limit_k[k.form] += get_kinder_jungwon(k);
     }
   });
 

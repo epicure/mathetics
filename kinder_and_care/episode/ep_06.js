@@ -13,7 +13,7 @@ function build_ep_06() {
   let private_per = Math.round(num_private_kid/num_kid_population*100);
   
   let html = `
-    <p>국공립에 비해 사립은 충원율이 낮아지는 추세입니다. 지면으로 부터의 높이가 모집정원을 나타냅니다.</p>
+    <p>국공립은 사립에 비해 수가 적고 사립은 국공립에 비해 충원율이 낮습니다. 지면으로 부터의 높이가 모집정원과 현원을 나타냅니다.</p>
     <p>
       <table>
         <tbody>
@@ -97,6 +97,61 @@ function build_ep_06() {
     }
   });
   
+  function take(p, kinds) {
+    let shrink = true;
+    //let shrink = p.kinder.status == '폐원';
+    
+    for(let kind of kinds) {
+      if(kind.includes(p.kinder.form)) {
+        let scale_keys = [
+          p.scale.clone(),
+          new THREE.Vector3(2, 2, 2),
+          new THREE.Vector3(1, 1, 1),
+        ];
+        let dur = 30+Math.random()*60|0;
+        anim_gens.push(gen_vec3(p, 'scale', scale_keys, dur));
+
+        let z = p.origin.z + get_kinder_jungwon(p.kinder) * 0.05;
+        let s_keys = [
+          p.segment.scale.clone(),
+          new THREE.Vector3(1, 1, z+0.001),
+        ];
+        anim_gens.push(gen_vec3(p.segment, 'scale', s_keys, dur));
+        
+        let pz = p.origin.z + get_kinder_hyunwon(p.kinder) * 0.05;
+        let pos_keys = [
+          p.position.clone(),
+          new THREE.Vector3(p.position.x, p.position.y, pz),
+        ];
+        anim_gens.push(gen_vec3(p, 'position', pos_keys, dur));
+        shrink = false;
+      }
+    }    
+        
+    if (shrink) {
+      let scale_keys = [
+        p.scale.clone(),
+        new THREE.Vector3(2, 2, 2),
+        new THREE.Vector3(0.001, 0.001, 0.001),
+      ];
+      let dur = 30+Math.random()*60|0;
+      anim_gens.push(gen_vec3(p, 'scale', scale_keys, dur));
+
+      //let z = 0.001 + (get_kinder_limit(p.kinder) * 0.05 + p.origin.z);
+      let s_keys = [
+        p.segment.scale.clone(),
+        new THREE.Vector3(1, 1, 0.001),
+      ];
+      anim_gens.push(gen_vec3(p.segment, 'scale', s_keys, dur));
+      
+      let pos_keys = [
+        p.position.clone(),
+        p.origin.clone(),
+      ];
+      anim_gens.push(gen_vec3(p, 'position', pos_keys, dur));
+    }
+  }
+  
   el.querySelectorAll('q0').forEach(q => {
     q.className = 'q';
     q.style['border-bottom'] = '2px solid rgb(127,255,0)';
@@ -107,27 +162,7 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        let shrink = p.kinder.status == '폐원';
-        if(kind_care_public.includes(p.kinder.form)) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(1, 1, 1),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
-        else {
-          shrink = true;
-        }
-        
-        if (shrink) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
+        take(p, [kind_care_public]);
       });
     }
   });
@@ -142,27 +177,7 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        let shrink = p.kinder.status == '폐원';
-        if(kind_care_private.includes(p.kinder.form)) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(1, 1, 1),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
-        else {
-          shrink = true;
-        }
-        
-        if (shrink) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
+        take(p, [kind_care_private]);
       });
     }
   });
@@ -177,27 +192,7 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        let shrink = p.kinder.status == '폐원';
-        if(kind_kinder_public.includes(p.kinder.form)) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(1, 1, 1),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
-        else {
-          shrink = true;
-        }
-        
-        if (shrink) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
+        take(p, [kind_kinder_public]);
       });
     }
   });
@@ -212,27 +207,7 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        let shrink = p.kinder.status == '폐원';
-        if(kind_kinder_private.includes(p.kinder.form)) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(1, 1, 1),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
-        else {
-          shrink = true;
-        }
-        
-        if (shrink) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
+        take(p, [kind_kinder_private]);
       });
     }
   });
@@ -247,44 +222,7 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
-        let shrink = p.kinder.status == '폐원';
-        if(p.kinder.type == '어린이집') {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(1, 1, 1),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-          
-          if(kind_care_public.includes(p.kinder.form)) {
-            let color_keys = [
-              new THREE.Vector3(...p.material.color.toArray()),
-              new THREE.Vector3(Math.random(),Math.random(),Math.random()),
-              new THREE.Vector3(0.5, 1, 0),
-            ]
-            anim_gens.push(gen_color(p.material, 'color', color_keys, 30+Math.random()*60|0));
-          }
-          else if(kind_care_private.includes(p.kinder.form)) {
-            let color_keys = [
-              new THREE.Vector3(...p.material.color.toArray()),
-              new THREE.Vector3(Math.random(),Math.random(),Math.random()),
-              new THREE.Vector3(0, 0.5, 1),
-            ]
-            anim_gens.push(gen_color(p.material, 'color', color_keys, 30+Math.random()*60|0));
-          }
-        }
-        else {
-          shrink = true;
-        }
-        
-        if (shrink) {
-          let scale_keys = [
-            p.scale.clone(),
-            new THREE.Vector3(2, 2, 2),
-            new THREE.Vector3(0.001, 0.001, 0.001),
-          ] 
-          anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
-        }
+        take(p, [kind_care_public, kind_care_private]);
       });
     }
   });
@@ -299,6 +237,8 @@ function build_ep_06() {
       //if(e.target == sel) return;
       sel = e.target;
       place.children.forEach(p => {
+        take(p, [kind_kinder_public, kind_kinder_private]);
+        /*
         let shrink = p.kinder.status == '폐원';
         if(p.kinder.type == '유치원') {
           let scale_keys = [
@@ -337,6 +277,7 @@ function build_ep_06() {
           ] 
           anim_gens.push(gen_vec3(p, 'scale', scale_keys, 30+Math.random()*60|0));
         }
+        */
       });
     }
   });
@@ -399,14 +340,14 @@ function build_ep_06() {
         }
         
         if(p.kinder.type == '어린이집') {
-          let v = new THREE.Vector3(p.position.x, p.position.y, p.origin.z + get_care_limit(p.kinder) * 0.05);
+          let v = new THREE.Vector3(p.position.x, p.position.y, p.origin.z + get_kinder_jungwon(p.kinder) * 0.05);
           let pos_keys = [
             p.position.clone(),
             v,
           ];
           let dur = 90+Math.random()*60|0;
           anim_gens.push(gen_vec3(p, 'position', pos_keys, dur));
-          let z = 0.001 + (get_care_limit(p.kinder) * 0.05 + p.origin.z);
+          let z = 0.001 + (get_kinder_jungwon(p.kinder) * 0.05 + p.origin.z);
           let s_keys = [
             p.segment.scale.clone(),
             new THREE.Vector3(1, 1, z)
@@ -414,14 +355,14 @@ function build_ep_06() {
           anim_gens.push(gen_vec3(p.segment, 'scale', s_keys, dur));
         }
         else if(p.kinder.type == '유치원') {
-          let v = new THREE.Vector3(p.position.x, p.position.y, p.origin.z + get_kinder_limit(p.kinder) * 0.05);
+          let v = new THREE.Vector3(p.position.x, p.position.y, p.origin.z + get_kinder_jungwon(p.kinder) * 0.05);
           let pos_keys = [
             p.position.clone(),
             v,
           ];
           let dur = 90+Math.random()*60|0;
           anim_gens.push(gen_vec3(p, 'position', pos_keys, dur));
-          let z = 0.001 + (get_kinder_limit(p.kinder) * 0.05 + p.origin.z);
+          let z = 0.001 + (get_kinder_jungwon(p.kinder) * 0.05 + p.origin.z);
           let s_keys = [
             p.segment.scale.clone(),
             new THREE.Vector3(1, 1, z)
